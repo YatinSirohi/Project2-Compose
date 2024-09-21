@@ -1,0 +1,27 @@
+services:
+  dind:
+    image: docker:dind  # Using the Docker-in-Docker image
+    privileged: true     # Required for running DinD
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs  # Setting TLS certificate directory
+    volumes:
+      - jenkins-docker-certs:/certs/client  # Volume for TLS certs
+      - jenkins-data:/var/jenkins_home  # Volume for Jenkins data
+    networks:
+      jenkins-network:              # Connecting to the custom network
+        aliases:
+          - docker                   # Setting network alias
+    ports:
+      - "2376:2376"                 # Exposing the  Docker daemon port
+    command: --storage-driver overlay2  # Using overlay2 storage driver
+
+# Defining named volumes for data persistence
+volumes:
+  jenkins-docker-certs:           # Volume for storing Docker TLS certs
+  jenkins-data:                    # Volume for Jenkins data
+
+# Defining custom network for the services to communicate
+networks:
+  jenkins-network:                 # Custom network for Jenkins and DinD
+    driver: bridge                 # Use the default bridge network
+
